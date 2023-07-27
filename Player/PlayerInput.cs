@@ -22,6 +22,8 @@ public class PlayerInput : GameComponent
     public delegate void ShootHandler(object sender, EventArgs e);
 
     public delegate void SwitchWeaponHandler(object sender, WeaponSlotEventArgs e);
+
+    public delegate void EscapeOrMenuHandler(object sender, EventArgs e);
     
     public event MovementHandler OnMovement;
     
@@ -31,6 +33,8 @@ public class PlayerInput : GameComponent
 
     public event SwitchWeaponHandler OnSwitchWeapon;
 
+    public event EscapeOrMenuHandler OnEscapeOrMenu;
+
     public override void Update(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
@@ -38,6 +42,11 @@ public class PlayerInput : GameComponent
         if (movement != Vector2.Zero)
         {
             OnMovement?.Invoke(this, new Vector2EventArgs(movement));
+        }
+
+        if (EscapeOrMenu(keyboardState))
+        {
+            OnEscapeOrMenu?.Invoke(this, EventArgs.Empty);
         }
         
         var mouseState = Mouse.GetState();
@@ -47,7 +56,57 @@ public class PlayerInput : GameComponent
             OnLook?.Invoke(this, new Vector2EventArgs(look));
         }
 
+        if (Shooting(mouseState))
+        {
+            OnShoot?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (SwitchingWeapons(keyboardState, out var weaponSlot))
+        {
+            OnSwitchWeapon?.Invoke(this, new WeaponSlotEventArgs(weaponSlot));
+        }
+
         base.Update(gameTime);
+    }
+
+    private bool SwitchingWeapons(KeyboardState keyboardState, out WeaponSlot weaponSlot)
+    {
+        weaponSlot = WeaponSlot.One;
+        if (keyboardState.IsKeyDown(Keys.D1))
+        {
+            weaponSlot = WeaponSlot.One;
+            return true;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.D2))
+        {
+            weaponSlot = WeaponSlot.Two;
+            return true;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.D3))
+        {
+            weaponSlot = WeaponSlot.Three;
+            return true;
+        }
+
+        if (keyboardState.IsKeyDown(Keys.D4))
+        {
+            weaponSlot = WeaponSlot.Four;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool Shooting(MouseState mouseState)
+    {
+        return mouseState.LeftButton == ButtonState.Pressed;
+    }
+
+    private bool EscapeOrMenu(KeyboardState keyboardState)
+    {
+        return keyboardState.IsKeyDown(Keys.Escape);
     }
 
     private Vector2 GetMovement(KeyboardState keyboardState)

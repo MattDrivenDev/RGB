@@ -1,7 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Screens;
+using MonoGame.Extended.Screens.Transitions;
 using RGB.Player;
+using RGB.Screens;
 
 namespace RGB;
 
@@ -9,16 +12,17 @@ public class GameEngine : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-
-    // To test
     private PlayerInput _playerInput;
-    private PlayerCharacter _playerCharacter;
+    private ScreenManager _screenManager;
 
     public GameEngine()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
+
+        _screenManager = new ScreenManager();
+        Components.Add(_screenManager);
     }
 
     protected override void Initialize()
@@ -30,6 +34,8 @@ public class GameEngine : Game
         Services.AddService(_playerInput);
 
         base.Initialize();
+
+        LoadTitleSreen();
     }
 
     protected override void LoadContent()
@@ -42,8 +48,6 @@ public class GameEngine : Game
         // Add required objects to the IoC container
         Services.AddService(_spriteBatch);
         Services.AddService(settings);
-
-        _playerCharacter = new R(this);
     }
 
     protected override void Update(GameTime gameTime)
@@ -53,21 +57,40 @@ public class GameEngine : Game
 
         // TODO: Add your update logic here
         _playerInput.Update(gameTime);
-        _playerCharacter.Update(gameTime);
-
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.DarkGray);
-
         // TODO: Add your drawing code here
-        _playerCharacter.Draw(gameTime);
 
         // Write the fps to the window title
         Window.Title = $"RGB - FPS: {1 / gameTime.ElapsedGameTime.TotalSeconds}";
 
         base.Draw(gameTime);
+    }
+
+    private void LoadTitleSreen()
+    {
+        var screen = new TitleScreen(this);
+        screen.OnNavigateForward += (sender, args) => LoadMainMenuScreen();
+        screen.OnNavigateBack += (sender, args) => Exit();
+
+        _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
+    }
+
+    private void LoadMainMenuScreen()
+    {
+        var screen = new MainMenuScreen(this);
+        screen.OnNewGame += (sender, args) => LoadGameplayScreen();
+
+        _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
+    }
+
+    private void LoadGameplayScreen()
+    {
+        var screen = new GameplayScreen(this);
+
+        _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
     }
 }

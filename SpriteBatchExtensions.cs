@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -29,5 +30,41 @@ public static class SpriteBatchExtensions
                 spriteBatch.Draw(pixel, position + new Vector2(x, y), color);
             }
         }
+    }
+
+    public static void DrawCross(this SpriteBatch spriteBatch, Vector2 position, int radius, Color color)
+    {
+        var pixel = GetPixel(spriteBatch);
+        for (int y = -radius; y <= radius; y++)
+        for (int x = -radius; x <= radius; x++)
+        {
+            if (x * x + y * y <= radius * radius)
+            {
+                if (x == 0 || y == 0)
+                {
+                    spriteBatch.Draw(pixel, position + new Vector2(x, y), color);
+                }
+            }
+        }
+    }
+
+    public static void DrawLine(this SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color, int thickness, float layerDepth = 0)
+    {
+        var pixel = GetPixel(spriteBatch);
+
+        var edge = end - start;
+        var rotation = MathF.Atan2(edge.Y, edge.X);
+        var lineScale = new Vector2(edge.Length(), thickness);
+
+        spriteBatch.Draw(
+            _pixel, 
+            start, 
+            null, 
+            color, 
+            rotation, 
+            Vector2.Zero, 
+            lineScale, 
+            SpriteEffects.None, 
+            layerDepth);
     }
 }

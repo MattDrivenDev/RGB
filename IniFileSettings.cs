@@ -14,11 +14,13 @@ public class IniFileSettings
         
         var settings = new IniFileSettings
         {
-            PlayerSpeed = 100.0f
+            PlayerSpeed = 100.0f,
+            PlayerReloadTime = 0.35f
         };
 
         return settings;
     }
 
     public float PlayerSpeed { get; private set; }
+    public float PlayerReloadTime { get; private set; }
 }
