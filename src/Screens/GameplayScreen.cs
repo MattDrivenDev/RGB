@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended.Screens;
+using MonoGame.Extended.Tiled;
+using MonoGame.Extended.Tiled.Renderers;
 using RGB.Player;
 
 namespace RGB.Screens;
@@ -12,6 +14,9 @@ public class GameplayScreen : GameScreen
 
     public GameplayScreen(Game game) : base(game)
     {
+        Map = Content.Load<TiledMap>("Maps/RGB01");
+        MapRenderer = new TiledMapRenderer(GraphicsDevice, Map);
+
         R = new R(game);
         G = new G(game);
         B = new B(game);
@@ -35,6 +40,8 @@ public class GameplayScreen : GameScreen
     public PlayerCharacter B { get; private init; }
     public PlayerCharacter Y { get; private init; } 
     public bool IsActive { get; set; } = true;
+    public TiledMap Map { get; private set; }
+    public TiledMapRenderer MapRenderer { get; private set; }
 
     private void QueueActivation(WeaponSlot weaponSlot)
     {
@@ -72,6 +79,8 @@ public class GameplayScreen : GameScreen
 
     public override void Update(GameTime gameTime)
     {
+        MapRenderer.Update(gameTime);
+
         if (_weaponSlot.HasValue)
         {
             Activate(_weaponSlot.Value);
@@ -86,7 +95,9 @@ public class GameplayScreen : GameScreen
     public override void Draw(GameTime gameTime)
     {
         Game.GraphicsDevice.Clear(Color.DarkGray);
-        
+
+        MapRenderer.Draw();
+
         R.Draw(gameTime);
         G.Draw(gameTime);
         B.Draw(gameTime);

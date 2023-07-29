@@ -10,6 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:..\..\libs\MonoGame.Extended\MonoGame.Extended.Content.Pipeline\bin\net6.0\MonoGame.Extended.Content.Pipeline.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -26,4 +27,9 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:Fonts/title.spritefont
+
+#begin Maps/RGB01.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:Maps/RGB01.tmx
 

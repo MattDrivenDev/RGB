@@ -1,0 +1,33 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "RGB01.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "RGB01.tmx": {
+            "scale": 0.9262499999999999,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 480.97165991902847,
+                "y": 320.1079622132254
+            }
+        },
+        "RGB01.tmx#Tileset": {
+            "scaleInDock": 1
+        }
+    },
+    "last.imagePath": "C:/repos/RGB/Content/Maps",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "RGB01.tmx"
+    ],
+    "project": "RGB.tiled-project",
+    "recentFiles": [
+        "RGB01.tmx"
+    ],
+    "tileset.embedInMap": true
+}
