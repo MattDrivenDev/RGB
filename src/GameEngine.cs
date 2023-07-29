@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended;
 using MonoGame.Extended.Screens;
 using MonoGame.Extended.Screens.Transitions;
+using MonoGame.Extended.ViewportAdapters;
 using RGB.Player;
 using RGB.Screens;
 
@@ -14,6 +16,7 @@ public class GameEngine : Game
     private SpriteBatch _spriteBatch;
     private PlayerInput _playerInput;
     private ScreenManager _screenManager;
+    private OrthographicCamera _camera;
 
     public GameEngine()
     {
@@ -27,11 +30,18 @@ public class GameEngine : Game
 
     protected override void Initialize()
     {
+        _camera = new OrthographicCamera(
+            new BoxingViewportAdapter(
+                Window,
+                GraphicsDevice,
+                800, 480));
+
         // TODO: Add your initialization logic here
         _playerInput = new PlayerInput(this);
 
         // Add required objects to the IoC container
         Services.AddService(_playerInput);
+        Services.AddService(_camera);
 
         base.Initialize();
 

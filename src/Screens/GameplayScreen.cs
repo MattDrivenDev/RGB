@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using MonoGame.Extended;
 using MonoGame.Extended.Screens;
 using MonoGame.Extended.Tiled;
 using MonoGame.Extended.Tiled.Renderers;
@@ -14,6 +15,7 @@ public class GameplayScreen : GameScreen
 
     public GameplayScreen(Game game) : base(game)
     {
+        Camera = Game.Services.GetService<OrthographicCamera>();
         Map = Content.Load<TiledMap>("Maps/RGB01");
         MapRenderer = new TiledMapRenderer(GraphicsDevice, Map);
 
@@ -21,6 +23,11 @@ public class GameplayScreen : GameScreen
         G = new G(game);
         B = new B(game);
         Y = new Y(game);
+
+        Game.Components.Add(R);
+        Game.Components.Add(G);
+        Game.Components.Add(B);
+        Game.Components.Add(Y);
         
         R.Position = new Vector2(100, 100);
         G.Position = new Vector2(200, 100);
@@ -42,6 +49,7 @@ public class GameplayScreen : GameScreen
     public bool IsActive { get; set; } = true;
     public TiledMap Map { get; private set; }
     public TiledMapRenderer MapRenderer { get; private set; }
+    public OrthographicCamera Camera { get; private set; }
 
     private void QueueActivation(WeaponSlot weaponSlot)
     {
@@ -85,22 +93,13 @@ public class GameplayScreen : GameScreen
         {
             Activate(_weaponSlot.Value);
         }
-
-        R.Update(gameTime);
-        G.Update(gameTime);
-        B.Update(gameTime);
-        Y.Update(gameTime);
     }
 
     public override void Draw(GameTime gameTime)
     {
         Game.GraphicsDevice.Clear(Color.DarkGray);
 
-        MapRenderer.Draw();
-
-        R.Draw(gameTime);
-        G.Draw(gameTime);
-        B.Draw(gameTime);
-        Y.Draw(gameTime);        
+        var viewMatrix = Camera.GetViewMatrix();
+        MapRenderer.Draw(viewMatrix: viewMatrix);    
     }
 }

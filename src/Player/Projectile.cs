@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 
 namespace RGB.Player;
 
@@ -10,6 +11,7 @@ public class Projectile : DrawableGameComponent
         : base(game)
     {
         this.SpriteBatch = game.Services.GetService<SpriteBatch>();
+        this.Camera = game.Services.GetService<OrthographicCamera>();
 
         Position = position;
         AngleInDegrees = angleInDegrees;
@@ -20,6 +22,7 @@ public class Projectile : DrawableGameComponent
     public Vector2 Position { get; set; }
     public float AngleInDegrees { get; set; }
     public float Speed { get; set; }
+    protected OrthographicCamera Camera { get; init; }
 
     public override void Update(GameTime gameTime)
     {
@@ -38,7 +41,8 @@ public class Projectile : DrawableGameComponent
 
     public override void Draw(GameTime gameTime)
     {
-        SpriteBatch.Begin();
+        var viewMatrix = Camera.GetViewMatrix();
+        SpriteBatch.Begin(transformMatrix: viewMatrix);
         SpriteBatch.DrawCircle(Position, 2, Color.Black);
         SpriteBatch.End();   
 

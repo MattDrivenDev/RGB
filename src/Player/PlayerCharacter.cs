@@ -1,6 +1,8 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
+using MonoGame.Extended.Timers;
 
 namespace RGB.Player;
 
@@ -29,6 +31,7 @@ public abstract class PlayerCharacter : DrawableGameComponent
         PlayerReloadTime = settings.PlayerReloadTime;
 
         SpriteBatch = Game.Services.GetService<SpriteBatch>();
+        Camera = Game.Services.GetService<OrthographicCamera>();
 
         Position = Vector2.Zero;
     }
@@ -36,14 +39,15 @@ public abstract class PlayerCharacter : DrawableGameComponent
     public delegate void SwitchWeaponHandler(object sender, WeaponSlotEventArgs e);
     public event SwitchWeaponHandler SwitchWeapon;
 
-    protected float PlayerSpeed { get; init; }
-    protected float PlayerReloadTime { get; init; }
+    protected virtual float PlayerSpeed { get; init; }
+    protected virtual float PlayerReloadTime { get; init; }
     protected PlayerInput PlayerInput { get; init; }
     public Vector2 Position { get; set; }
     protected Vector2 Aim { get; set; }
     protected SpriteBatch SpriteBatch { get; init; }
     protected abstract Color Color { get; }
     public bool IsActive => Enabled;
+    protected OrthographicCamera Camera { get; init; }
 
     public void Activate(PlayerCharacter previous)
     {
@@ -64,39 +68,64 @@ public abstract class PlayerCharacter : DrawableGameComponent
             return;
         }
 
+        var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        var totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
+
+        // It would be kind of nice to have the camera follow the player 
+        // with a sort of delay, like in the original GTA games. But this
+        // will do for now.
+        Camera.LookAt(Position);
+
+        Move(deltaTime);
+
+        Look();
+
+        Shoot(totalTime);
+
+        base.Update(gameTime);
+    }
+
+    private void Move(float deltaTime)
+    {
         if (_movement != Vector2.Zero)
         {
-            Position += _movement * PlayerSpeed * (float) gameTime.ElapsedGameTime.TotalSeconds;
+            Position += _movement * PlayerSpeed * deltaTime;
             _movement = Vector2.Zero;
         }
+    }
 
+    private void Look()
+    {
         if (_look != Vector2.Zero)
         {
             Aim = _look;
             _look = Vector2.Zero;
         }
+    }
 
-        if(_shoot && (float) gameTime.TotalGameTime.TotalSeconds - _timeSinceLastShot > PlayerReloadTime)
+    private void Shoot(float totalTime)
+    {
+        if (_shoot && totalTime - _timeSinceLastShot > PlayerReloadTime)
         {
             // Calculate the angle in degrees between the players position and the aim position.
             var angleInRadians = MathF.Atan2(Aim.Y - Position.Y, Aim.X - Position.X);
             var angleInDegrees = MathHelper.ToDegrees(angleInRadians);
+            
             var projectile = new Projectile(Game, Position, angleInDegrees, 10);
+            Game.Components.Add(projectile);
+
+            // Reset the shoot flag.
             _shoot = false;
 
             // Set the last shot time to now.
-            _timeSinceLastShot = (float) gameTime.TotalGameTime.TotalSeconds;
-
-            // Ohhhhh! *a penny drops*
-            Game.Components.Add(projectile);
+            _timeSinceLastShot = totalTime;
         }
-
-        base.Update(gameTime);
     }
 
     public override void Draw(GameTime gameTime)
     {
-        this.SpriteBatch.Begin();
+        var viewMatrix = Camera.GetViewMatrix();
+        this.SpriteBatch.Begin(transformMatrix: viewMatrix);
         this.SpriteBatch.DrawCircle(Position, 10, this.Color);       
 
         // Only render the aim if the player is active.
