@@ -5,7 +5,9 @@ A classic top-down shooter game where the player has to switch between four diff
 This will evolve constantly for the next few weeks, but here's a rough list of what I want to do next:
 - [ ] Add a proper README
 - [ ] Add a proper LICENSE
-- [ ] Fullscreen mode and resolution options
+- [x] Parse settings from ini file
+- [x] Fullscreen mode
+- [ ] Resolution options
 - [ ] Different projectiles for each character
 - [ ] Add a simple enemy with a simple AI that tries to attack any of the player characters
 - [ ] Enable collisions between projectiles and enemies so we can kill them

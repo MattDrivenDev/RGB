@@ -20,7 +20,12 @@ public class GameEngine : Game
 
     public GameEngine()
     {
+        var settings = IniFileSettings.Create("RGB.ini");
+        Services.AddService(settings);
+
         _graphics = new GraphicsDeviceManager(this);
+        _graphics.IsFullScreen = settings.Fullscreen;
+
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
 
@@ -53,11 +58,9 @@ public class GameEngine : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // TODO: use this.Content to load your game content here
-        var settings = IniFileSettings.Create("RBG.ini");
 
         // Add required objects to the IoC container
         Services.AddService(_spriteBatch);
-        Services.AddService(settings);
     }
 
     protected override void Update(GameTime gameTime)
