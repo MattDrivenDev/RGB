@@ -89,7 +89,8 @@ public abstract class PlayerCharacter : DrawableGameComponent
     {
         if (_movement != Vector2.Zero)
         {
-            Position += _movement * PlayerSpeed * deltaTime;
+            var delta = Vector2.Normalize(_movement) * PlayerSpeed * deltaTime;
+            Position += delta;
             _movement = Vector2.Zero;
         }
     }
@@ -98,7 +99,7 @@ public abstract class PlayerCharacter : DrawableGameComponent
     {
         if (_look != Vector2.Zero)
         {
-            Aim = _look;
+            Aim = Camera.ScreenToWorld(_look);
             _look = Vector2.Zero;
         }
     }

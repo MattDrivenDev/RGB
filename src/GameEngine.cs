@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 using MonoGame.Extended.Screens;
 using MonoGame.Extended.Screens.Transitions;
@@ -20,17 +19,31 @@ public class GameEngine : Game
 
     public GameEngine()
     {
-        var settings = IniFileSettings.Create("RGB.ini");
-        Services.AddService(settings);
+        Settings = IniFileSettings.Create("RGB.ini");
+        Services.AddService(Settings);
 
         _graphics = new GraphicsDeviceManager(this);
-        _graphics.IsFullScreen = settings.Fullscreen;
+        _graphics.IsFullScreen = Settings.Fullscreen;
+        _graphics.PreferredBackBufferWidth = (int)Settings.ScreenResolution.X;
+        _graphics.PreferredBackBufferHeight = (int)Settings.ScreenResolution.Y;
 
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
 
         _screenManager = new ScreenManager();
         Components.Add(_screenManager);
+
+        Settings.OnVideoSettingsChanged += Settings_OnVideoSettingsChanged;
+    }
+
+    public IniFileSettings Settings { get; private set; }
+
+    private void Settings_OnVideoSettingsChanged(object sender, System.EventArgs e)
+    {
+        _graphics.IsFullScreen = Settings.Fullscreen;
+        _graphics.PreferredBackBufferWidth = (int)Settings.ScreenResolution.X;
+        _graphics.PreferredBackBufferHeight = (int)Settings.ScreenResolution.Y;
+        _graphics.ApplyChanges();
     }
 
     protected override void Initialize()
@@ -41,8 +54,8 @@ public class GameEngine : Game
                 GraphicsDevice,
                 800, 480));
 
-        // TODO: Add your initialization logic here
         _playerInput = new PlayerInput(this);
+        Components.Add(_playerInput);
 
         // Add required objects to the IoC container
         Services.AddService(_playerInput);
@@ -65,11 +78,8 @@ public class GameEngine : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            Exit();
+        //_playerInput.Update(gameTime);
 
-        // TODO: Add your update logic here
-        _playerInput.Update(gameTime);
         base.Update(gameTime);
     }
 
@@ -96,6 +106,16 @@ public class GameEngine : Game
     {
         var screen = new MainMenuScreen(this);
         screen.OnNewGame += (sender, args) => LoadGameplayScreen();
+        screen.OnOpenOptions += (sender, args) => LoadOptionsMenuScreen();
+        screen.OnExitGame += (sender, args) => Exit();
+
+        _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
+    }
+
+    private void LoadOptionsMenuScreen()
+    {
+        var screen = new OptionsMenuScreen(this);
+        screen.OnNavigateBack += (sender, args) => LoadMainMenuScreen();
 
         _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
     }

@@ -33,15 +33,17 @@ public abstract class MenuScreen : GameScreen
         var item = new MenuScreenItem(Game, this)
         {
             Text = text,
-            Action = action,
-            Bounds = new Rectangle(0, 0, 100, 20)
+            Action = action
         };
 
-        AddMenuScreenItem(item);
-    }
+        var stringSize = item.Font.MeasureString(item.Text);
 
-    protected void AddMenuScreenItem(MenuScreenItem item)
-    {
+        item.Bounds = new Rectangle(
+            100,
+            100 + (int)(Items.Count * stringSize.Y),
+            (int)stringSize.X,
+            (int)stringSize.Y);
+
         Items.Add(item);
     }
 
@@ -66,7 +68,7 @@ public abstract class MenuScreen : GameScreen
         this.SpriteBatch.End();
 
         foreach (var item in Items)
-        {
+        {   
             item.Draw(gameTime);
         }
     }
