@@ -87,10 +87,20 @@ public abstract class PlayerCharacter : DrawableGameComponent
 
     private void Move(float deltaTime)
     {
+        // Only move the player if there is movement input.
         if (_movement != Vector2.Zero)
         {
-            var delta = Vector2.Normalize(_movement) * PlayerSpeed * deltaTime;
-            Position += delta;
+            // Normalize the movement vector.
+            var normalizedMovement = Vector2.Normalize(_movement);
+
+            // Calculate the position delta based on the normalized movement vector
+            // with the player speed and the elapsed time since the last update.
+            var positionDelta = normalizedMovement * PlayerSpeed * deltaTime;
+
+            // Apply the delta to the player position.
+            Position += positionDelta;
+
+            // Reset the movement vector.
             _movement = Vector2.Zero;
         }
     }

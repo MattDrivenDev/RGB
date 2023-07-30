@@ -9,11 +9,11 @@
     ],
     "fileStates": {
         "RGB01.tmx": {
-            "scale": 4,
-            "selectedLayer": 0,
+            "scale": 1,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 1686.5,
-                "y": 1247.375
+                "x": 1253,
+                "y": 1440.5
             }
         },
         "RGB01.tmx#Tileset": {

@@ -23,9 +23,7 @@ public class GameEngine : Game
         Services.AddService(Settings);
 
         _graphics = new GraphicsDeviceManager(this);
-        _graphics.IsFullScreen = Settings.Fullscreen;
-        _graphics.PreferredBackBufferWidth = (int)Settings.ScreenResolution.X;
-        _graphics.PreferredBackBufferHeight = (int)Settings.ScreenResolution.Y;
+        InitializeGraphics();
 
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
@@ -40,30 +38,36 @@ public class GameEngine : Game
 
     private void Settings_OnVideoSettingsChanged(object sender, System.EventArgs e)
     {
-        _graphics.IsFullScreen = Settings.Fullscreen;
-        _graphics.PreferredBackBufferWidth = (int)Settings.ScreenResolution.X;
-        _graphics.PreferredBackBufferHeight = (int)Settings.ScreenResolution.Y;
-        _graphics.ApplyChanges();
+        InitializeGraphics();
     }
 
     protected override void Initialize()
     {
-        _camera = new OrthographicCamera(
-            new BoxingViewportAdapter(
-                Window,
-                GraphicsDevice,
-                800, 480));
-
         _playerInput = new PlayerInput(this);
         Components.Add(_playerInput);
 
         // Add required objects to the IoC container
         Services.AddService(_playerInput);
-        Services.AddService(_camera);
 
         base.Initialize();
 
         LoadTitleSreen();
+    }
+
+    private void InitializeGraphics()
+    {
+        _graphics.IsFullScreen = Settings.Fullscreen;
+        _graphics.PreferredBackBufferWidth = (int)Settings.ScreenResolution.X;
+        _graphics.PreferredBackBufferHeight = (int)Settings.ScreenResolution.Y;
+        _graphics.ApplyChanges();
+
+        _camera = new OrthographicCamera(
+            new BoxingViewportAdapter(
+                Window,
+                GraphicsDevice,
+                _graphics.PreferredBackBufferWidth,
+                _graphics.PreferredBackBufferHeight));
+        Services.AddService(_camera);
     }
 
     protected override void LoadContent()
@@ -78,15 +82,11 @@ public class GameEngine : Game
 
     protected override void Update(GameTime gameTime)
     {
-        //_playerInput.Update(gameTime);
-
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        // TODO: Add your drawing code here
-
         // Write the fps to the window title
         Window.Title = $"RGB - FPS: {1 / gameTime.ElapsedGameTime.TotalSeconds}";
 

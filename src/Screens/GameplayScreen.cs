@@ -19,6 +19,8 @@ public class GameplayScreen : GameScreen
         Map = Content.Load<TiledMap>("Maps/RGB01");
         MapRenderer = new TiledMapRenderer(GraphicsDevice, Map);
 
+        var tiledPlayerLayer = Map.GetLayer<TiledMapObjectLayer>("Spawn");
+
         R = new R(game);
         G = new G(game);
         B = new B(game);
@@ -29,10 +31,10 @@ public class GameplayScreen : GameScreen
         Game.Components.Add(B);
         Game.Components.Add(Y);
         
-        R.Position = new Vector2(100, 100);
-        G.Position = new Vector2(200, 100);
-        B.Position = new Vector2(100, 200);
-        Y.Position = new Vector2(200, 200);
+        R.Position = tiledPlayerLayer.Objects.FirstOrDefault(x => x.Name == "R").Position;
+        G.Position = tiledPlayerLayer.Objects.FirstOrDefault(x => x.Name == "G").Position;
+        B.Position = tiledPlayerLayer.Objects.FirstOrDefault(x => x.Name == "B").Position;
+        Y.Position = tiledPlayerLayer.Objects.FirstOrDefault(x => x.Name == "Y").Position;
 
         Activate(R);
 
