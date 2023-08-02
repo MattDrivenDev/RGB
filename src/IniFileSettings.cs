@@ -14,6 +14,7 @@ public class IniFileSettings
     public bool Fullscreen { get; private set; }
     public float PlayerSpeed { get; private set; }
     public float PlayerReloadTime { get; private set; }
+    public float PlayerSize { get; private set; }
 
     public delegate void VideoSettingsHandler(object sender, EventArgs e);
     public event VideoSettingsHandler OnVideoSettingsChanged;
@@ -46,7 +47,8 @@ public class IniFileSettings
 
                 // Player
                 PlayerSpeed = float.Parse(parser.GetSetting("Player", "PlayerSpeed")),
-                PlayerReloadTime = float.Parse(parser.GetSetting("Player", "PlayerReloadTime"))
+                PlayerReloadTime = float.Parse(parser.GetSetting("Player", "PlayerReloadTime")),
+                PlayerSize = float.Parse(parser.GetSetting("Player", "PlayerSize"))
             };
 
             return settings;
@@ -65,7 +67,8 @@ public class IniFileSettings
 
                 // Player
                 PlayerSpeed = 100f,
-                PlayerReloadTime = 0.5f
+                PlayerReloadTime = 0.5f,
+                PlayerSize = 10f
             };
         }
     }

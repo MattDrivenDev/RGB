@@ -1,8 +1,11 @@
 using System;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
-using MonoGame.Extended.Timers;
+using MonoGame.Extended.Tiled;
+using RGB.World;
 
 namespace RGB.Player;
 
@@ -18,7 +21,7 @@ public abstract class PlayerCharacter : DrawableGameComponent
     private bool _shoot;
     private float _timeSinceLastShot;
 
-    protected PlayerCharacter(Game game) : base(game)
+    protected PlayerCharacter(Game game, WorldMap map) : base(game)
     {
         PlayerInput = Game.Services.GetService<PlayerInput>();
         PlayerInput.OnMovement += OnMovement;
@@ -29,9 +32,12 @@ public abstract class PlayerCharacter : DrawableGameComponent
         var settings = Game.Services.GetService<IniFileSettings>();
         PlayerSpeed = settings.PlayerSpeed;
         PlayerReloadTime = settings.PlayerReloadTime;
+        PlayerSize = settings.PlayerSize;
 
         SpriteBatch = Game.Services.GetService<SpriteBatch>();
         Camera = Game.Services.GetService<OrthographicCamera>();
+
+        Map = map;
 
         Position = Vector2.Zero;
     }
@@ -41,13 +47,16 @@ public abstract class PlayerCharacter : DrawableGameComponent
 
     protected virtual float PlayerSpeed { get; init; }
     protected virtual float PlayerReloadTime { get; init; }
+    protected virtual float PlayerSize { get; init; }
     protected PlayerInput PlayerInput { get; init; }
     public Vector2 Position { get; set; }
+    public CircleF BoundingCircle => new(Position, PlayerSize);
     protected Vector2 Aim { get; set; }
     protected SpriteBatch SpriteBatch { get; init; }
     protected abstract Color Color { get; }
     public bool IsActive => Enabled;
     protected OrthographicCamera Camera { get; init; }
+    protected WorldMap Map { get; init; }
 
     public void Activate(PlayerCharacter previous)
     {
@@ -89,7 +98,7 @@ public abstract class PlayerCharacter : DrawableGameComponent
     {
         // Only move the player if there is movement input.
         if (_movement != Vector2.Zero)
-        {
+        {   
             // Normalize the movement vector.
             var normalizedMovement = Vector2.Normalize(_movement);
 
@@ -97,7 +106,19 @@ public abstract class PlayerCharacter : DrawableGameComponent
             // with the player speed and the elapsed time since the last update.
             var positionDelta = normalizedMovement * PlayerSpeed * deltaTime;
 
-            // Apply the delta to the player position.
+            var nextPosition = Position + positionDelta;
+            var nextBounds = new CircleF(nextPosition, PlayerSize);
+
+            // Break this down into X+Y, then X, then Y - so you can
+            // slide along walls when using diagonal movement.
+            foreach(var x in Map.CollisionActors)
+            {
+                if(x.Bounds.Intersects(nextBounds))
+                {
+                    positionDelta = Vector2.Zero;
+                }
+            }
+
             Position += positionDelta;
 
             // Reset the movement vector.
@@ -122,7 +143,7 @@ public abstract class PlayerCharacter : DrawableGameComponent
             var angleInRadians = MathF.Atan2(Aim.Y - Position.Y, Aim.X - Position.X);
             var angleInDegrees = MathHelper.ToDegrees(angleInRadians);
             
-            var projectile = new Projectile(Game, Position, angleInDegrees, 10);
+            var projectile = new Projectile(Game, Map, Position, angleInDegrees, 10);
             Game.Components.Add(projectile);
 
             // Reset the shoot flag.

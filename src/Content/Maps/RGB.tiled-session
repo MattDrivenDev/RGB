@@ -8,19 +8,26 @@
         "."
     ],
     "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
         "RGB01.tmx": {
-            "scale": 1,
+            "scale": 2,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 1253,
-                "y": 1440.5
+                "x": 1599.75,
+                "y": 1599.75
             }
         },
-        "RGB01.tmx#Tileset": {
+        "RGB01.tmx#Collisions": {
             "scaleInDock": 1
+        },
+        "RGB01.tmx#Tileset": {
+            "scaleInDock": 1,
+            "scaleInEditor": 2
         }
     },
-    "last.imagePath": "C:/repos/RGB/Content/Maps",
+    "last.imagePath": "C:/repos/RGB/src/Content/Maps",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
         "RGB01.tmx"

@@ -1,10 +1,11 @@
 using Microsoft.Xna.Framework;
+using RGB.World;
 
 namespace RGB.Player;
 
 public class G : PlayerCharacter
 {
-    public G(Game game) : base(game)
+    public G(Game game, WorldMap map) : base(game, map)
     {
         
     }

@@ -26,6 +26,7 @@
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\libs\MonoGame.Extended\MonoGame.Extended.Collisions\MonoGame.Extended.Collisions.csproj" />
     <ProjectReference Include="..\libs\MonoGame.Extended\MonoGame.Extended.Content.Pipeline\MonoGame.Extended.Content.Pipeline.csproj" />
     <ProjectReference Include="..\libs\MonoGame.Extended\MonoGame.Extended.Graphics\MonoGame.Extended.Graphics.csproj" />
     <ProjectReference Include="..\libs\MonoGame.Extended\MonoGame.Extended.Tiled\MonoGame.Extended.Tiled.csproj" />

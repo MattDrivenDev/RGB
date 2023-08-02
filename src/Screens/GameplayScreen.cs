@@ -3,9 +3,8 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 using MonoGame.Extended.Screens;
-using MonoGame.Extended.Tiled;
-using MonoGame.Extended.Tiled.Renderers;
 using RGB.Player;
+using RGB.World;
 
 namespace RGB.Screens;
 
@@ -16,25 +15,24 @@ public class GameplayScreen : GameScreen
     public GameplayScreen(Game game) : base(game)
     {
         Camera = Game.Services.GetService<OrthographicCamera>();
-        Map = Content.Load<TiledMap>("Maps/RGB01");
-        MapRenderer = new TiledMapRenderer(GraphicsDevice, Map);
 
-        var tiledPlayerLayer = Map.GetLayer<TiledMapObjectLayer>("Spawn");
+        Map = new WorldMap(Game, "Maps/RGB01", Camera);  
+        Game.Components.Add(Map);
 
-        R = new R(game);
-        G = new G(game);
-        B = new B(game);
-        Y = new Y(game);
+        R = new R(game, Map);
+        G = new G(game, Map);
+        B = new B(game, Map);
+        Y = new Y(game, Map);
 
         Game.Components.Add(R);
         Game.Components.Add(G);
         Game.Components.Add(B);
         Game.Components.Add(Y);
         
-        R.Position = tiledPlayerLayer.Objects.FirstOrDefault(x => x.Name == "R").Position;
-        G.Position = tiledPlayerLayer.Objects.FirstOrDefault(x => x.Name == "G").Position;
-        B.Position = tiledPlayerLayer.Objects.FirstOrDefault(x => x.Name == "B").Position;
-        Y.Position = tiledPlayerLayer.Objects.FirstOrDefault(x => x.Name == "Y").Position;
+        R.Position = Map.GetSpawnPoint("R");
+        G.Position = Map.GetSpawnPoint("G");
+        B.Position = Map.GetSpawnPoint("B");
+        Y.Position = Map.GetSpawnPoint("Y");
 
         Activate(R);
 
@@ -49,9 +47,8 @@ public class GameplayScreen : GameScreen
     public PlayerCharacter B { get; private init; }
     public PlayerCharacter Y { get; private init; } 
     public bool IsActive { get; set; } = true;
-    public TiledMap Map { get; private set; }
-    public TiledMapRenderer MapRenderer { get; private set; }
     public OrthographicCamera Camera { get; private set; }
+    public WorldMap Map { get; init; }
 
     private void QueueActivation(WeaponSlot weaponSlot)
     {
@@ -89,8 +86,6 @@ public class GameplayScreen : GameScreen
 
     public override void Update(GameTime gameTime)
     {
-        MapRenderer.Update(gameTime);
-
         if (_weaponSlot.HasValue)
         {
             Activate(_weaponSlot.Value);
@@ -100,8 +95,5 @@ public class GameplayScreen : GameScreen
     public override void Draw(GameTime gameTime)
     {
         Game.GraphicsDevice.Clear(Color.DarkGray);
-
-        var viewMatrix = Camera.GetViewMatrix();
-        MapRenderer.Draw(viewMatrix: viewMatrix);    
     }
 }

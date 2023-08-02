@@ -2,17 +2,20 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using RGB.World;
 
 namespace RGB.Player;
 
 public class Projectile : DrawableGameComponent
 {
-    public Projectile(Game game, Vector2 position, float angleInDegrees, float speed) 
+    public Projectile(Game game, WorldMap map, 
+        Vector2 position, float angleInDegrees, float speed) 
         : base(game)
     {
         this.SpriteBatch = game.Services.GetService<SpriteBatch>();
         this.Camera = game.Services.GetService<OrthographicCamera>();
 
+        Map = map;
         Position = position;
         AngleInDegrees = angleInDegrees;
         Speed = speed;
@@ -23,9 +26,13 @@ public class Projectile : DrawableGameComponent
     public float AngleInDegrees { get; set; }
     public float Speed { get; set; }
     protected OrthographicCamera Camera { get; init; }
+    protected WorldMap Map { get; init; }
 
     public override void Update(GameTime gameTime)
     {
+        // If the projectile is disabled and not visible, just dispose of it.
+        if (!Enabled && !Visible) Dispose();
+
         // Calculate the angle in radians.
         var angleInRadians = MathHelper.ToRadians(AngleInDegrees);
 
@@ -34,7 +41,31 @@ public class Projectile : DrawableGameComponent
         var velocityY = MathF.Sin(angleInRadians) * Speed;
 
         // Move the position of the projectile.
-        Position += new Vector2(velocityX, velocityY);
+        var positionDelta = new Vector2(velocityX, velocityY);
+
+        foreach (var x in Map.CollisionActors)
+        {
+            switch(x.Bounds)
+            {
+                case RectangleF rect:
+                    if (rect.Contains(Position + positionDelta))
+                    {
+                        Enabled = false;
+                        Visible = false;
+                    }
+                    break;
+
+                case CircleF circle:
+                    if (circle.Contains(Position + positionDelta))
+                    {
+                        Enabled = false;
+                        Visible = false;
+                    }
+                    break;
+            }
+        }
+
+        Position += positionDelta;
 
         base.Update(gameTime);
     }
