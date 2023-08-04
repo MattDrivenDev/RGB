@@ -162,9 +162,9 @@ public abstract class PlayerCharacter
         Projectiles.ForEach(x => x.Draw(gameTime));
 
         var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-
         var viewMatrix = Camera.GetViewMatrix();
         spriteBatch.Begin(transformMatrix: viewMatrix);
+
         spriteBatch.DrawCircle(Position, 10, this.Color);       
 
         // Only render the aim if the player is active.

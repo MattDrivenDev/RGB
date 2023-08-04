@@ -1,5 +1,7 @@
-﻿using MonoGame.Extended;
+﻿using Microsoft.Xna.Framework;
+using MonoGame.Extended;
 using MonoGame.Extended.Collisions;
+using MonoGame.Extended.Shapes;
 using MonoGame.Extended.Tiled;
 using System;
 using System.Collections.Generic;
@@ -57,14 +59,18 @@ namespace RGB.World
                                 case TiledMapEllipseObject ellipse:
                                     var circleCollider = new MapCollider(
                                         new CircleF(new Point2(
-                                            tile.X * layer.TileWidth + ellipse.Center.X,
-                                            tile.Y * layer.TileHeight + ellipse.Center.Y),
+                                            tile.X * layer.TileWidth + ellipse.Position.X + ellipse.Radius.X,
+                                            tile.Y * layer.TileHeight + ellipse.Position.Y + ellipse.Radius.Y),
                                             ellipse.Radius.X));
                                     results.Add(circleCollider);
                                     break;
-                                //case TiledMapPolygonObject polygon:
-                                //    results.Add(new CollisionPolygon(polygon.Points));
-                                //    break;
+                                case TiledMapPolygonObject polygon:
+                                    var polygonCollider = new MapCollider(
+                                        new Polygon(polygon.Points.Select(x => new Vector2(
+                                            tile.X * layer.TileWidth + x.X,
+                                            tile.Y * layer.TileHeight + x.Y))));
+                                    results.Add(polygonCollider);
+                                    break;
                                 //case TiledMapPolylineObject polyline:
                                 //    results.Add(new CollisionLine(polyline.Points[0], polyline.Points[1]));
                                 //    break;

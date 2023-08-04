@@ -15,8 +15,8 @@ This will evolve constantly for the next few weeks, but here's a rough list of w
 - [ ] Add simple floor switch that does an action - switches are activated when a character of the same colour stands on it
 - [x] Tiled map editor integration
 - [x] Collisions with tiled map tileset collision objects
-- [ ] Fix bug where circular collision objects are not in the correct Y position
-- [	] PolygonF and PolylineF implementations for Tiled map objects
+- [x] Fix bug where circular collision objects are not in the correct Y position
+- [	] Investigate pixel-perfect collisions with tiled map instead of using collision objects
 - [x] Set starting positions for the player characters in the Tiled map
 - [ ] Player characters need health, which should be displayed on the HUD
 - [x] Orthoganal camera that follows the player

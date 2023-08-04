@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.Shapes;
 
 namespace RGB;
 
@@ -45,6 +46,18 @@ public static class SpriteBatchExtensions
                     spriteBatch.Draw(pixel, position + new Vector2(x, y), color);
                 }
             }
+        }
+    }
+
+    public static void DrawPolygon(this SpriteBatch spriteBatch, Polygon polygon)
+    {
+        var vertices = polygon.Vertices;
+        for (var i = 0; i < vertices.Length; i++)
+        {
+            var j = (i + 1) % vertices.Length;
+            var start = vertices[i];
+            var end = vertices[j];
+            spriteBatch.DrawLine(start, end, Color.Red, 2);
         }
     }
 

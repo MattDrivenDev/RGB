@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace MonoGame.Extended.Shapes
 {
-    public class Polygon : IEquatable<Polygon>
+    public class Polygon : IEquatable<Polygon>, IShapeF
     {
         public Polygon(IEnumerable<Vector2> vertices)
         {
@@ -121,6 +121,18 @@ namespace MonoGame.Extended.Shapes
                 var maxY = Bottom;
                 return new RectangleF(minX, minY, maxX - minX, maxY - minY);
             }
+        }
+
+        public Point2 Position
+        {
+            get
+            {
+                // Middle of the bounding rectangle
+                var x = (int) Math.Round(Left + (Right - Left)/2);
+                var y = (int) Math.Round(Top + (Bottom - Top)/2);
+                return new Point2(x, y);
+            }
+            set { throw new NotImplementedException(); }
         }
 
         public bool Contains(Vector2 point)

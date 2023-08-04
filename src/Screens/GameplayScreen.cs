@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Screens;
+using MonoGame.Extended.Shapes;
 using MonoGame.Extended.ViewportAdapters;
 using RGB.Player;
 using RGB.World;
@@ -49,6 +51,7 @@ public class GameplayScreen : GameScreen
     public PlayerCharacter G { get; private init; }
     public PlayerCharacter B { get; private init; }
     public PlayerCharacter Y { get; private init; } 
+    public PlayerCharacter[] Characters => new[] {R, G, B, Y};
     public bool IsActive { get; set; } = true;
     public OrthographicCamera Camera { get; private set; }
     public WorldMap Map { get; init; }
@@ -76,13 +79,9 @@ public class GameplayScreen : GameScreen
     private void Activate(PlayerCharacter character)
     {
         // Select the previous character if this is the first activation.
-        var all = new[] {R, G, B, Y};
-        var previous = all.FirstOrDefault(c => c.IsActive) ?? character;
+        var previous = Characters.FirstOrDefault(c => c.IsActive) ?? character;
 
-        R.Deactivate();
-        G.Deactivate();
-        B.Deactivate();
-        Y.Deactivate();
+        Characters.ToList().ForEach(x => x.Deactivate());
         
         character.Activate(previous);
         _weaponSlot = null;
@@ -95,18 +94,20 @@ public class GameplayScreen : GameScreen
             Activate(_weaponSlot.Value);
         }
 
-        R.Update(gameTime);
-        G.Update(gameTime);
-        B.Update(gameTime);
-        Y.Update(gameTime);
+        Characters.ToList().ForEach(x => x.Update(gameTime));
     }
 
     public override void Draw(GameTime gameTime)
     {
         Map.Draw(gameTime);
-        R.Draw(gameTime);
-        G.Draw(gameTime);
-        B.Draw(gameTime);
-        Y.Draw(gameTime);
+
+        // Draw the inactive characters first.
+        Characters.Where(x => !x.IsActive)
+            .ToList()
+            .ForEach(x => x.Draw(gameTime));
+
+        // Draw the active character last.
+        Characters.FirstOrDefault(x => x.IsActive)
+            .Draw(gameTime);
     }
 }

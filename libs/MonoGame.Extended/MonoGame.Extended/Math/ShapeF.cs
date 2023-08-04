@@ -1,4 +1,7 @@
-﻿namespace MonoGame.Extended
+﻿using Microsoft.Xna.Framework;
+using MonoGame.Extended.Shapes;
+
+namespace MonoGame.Extended
 {
     /// <summary>
     ///     Base class for shapes.
@@ -44,6 +47,14 @@
             else if (shapeA is CircleF circ2 && shapeB is RectangleF rect2)
             {
                 return Intersects(circ2, rect2);
+            }
+            else if(shapeA is CircleF circ && shapeB is Polygon polygon)
+            {
+                return Intersects(circ, polygon.BoundingRectangle);
+            }
+            else if(shapeA is Polygon polygon1 && shapeB is CircleF circp1)
+            {
+                return Intersects(polygon1.BoundingRectangle, circp1);
             }
 
             return intersects;
