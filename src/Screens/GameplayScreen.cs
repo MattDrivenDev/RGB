@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 using MonoGame.Extended.Screens;
+using MonoGame.Extended.ViewportAdapters;
 using RGB.Player;
 using RGB.World;
 
@@ -14,20 +15,22 @@ public class GameplayScreen : GameScreen
 
     public GameplayScreen(Game game) : base(game)
     {
-        Camera = Game.Services.GetService<OrthographicCamera>();
+        Settings = Services.GetService<IniFileSettings>();
+
+        Camera = new OrthographicCamera(
+            new BoxingViewportAdapter(
+                Game.Window,
+                GraphicsDevice,
+                (int)Settings.Resolution.X,
+                (int)Settings.Resolution.Y));
+        Services.AddService(Camera);
 
         Map = new WorldMap(Game, "Maps/RGB01", Camera);  
-        Game.Components.Add(Map);
 
         R = new R(game, Map);
         G = new G(game, Map);
         B = new B(game, Map);
         Y = new Y(game, Map);
-
-        Game.Components.Add(R);
-        Game.Components.Add(G);
-        Game.Components.Add(B);
-        Game.Components.Add(Y);
         
         R.Position = Map.GetSpawnPoint("R");
         G.Position = Map.GetSpawnPoint("G");
@@ -49,6 +52,7 @@ public class GameplayScreen : GameScreen
     public bool IsActive { get; set; } = true;
     public OrthographicCamera Camera { get; private set; }
     public WorldMap Map { get; init; }
+    protected IniFileSettings Settings { get; init; }
 
     private void QueueActivation(WeaponSlot weaponSlot)
     {
@@ -90,10 +94,19 @@ public class GameplayScreen : GameScreen
         {
             Activate(_weaponSlot.Value);
         }
+
+        R.Update(gameTime);
+        G.Update(gameTime);
+        B.Update(gameTime);
+        Y.Update(gameTime);
     }
 
     public override void Draw(GameTime gameTime)
     {
-        Game.GraphicsDevice.Clear(Color.DarkGray);
+        Map.Draw(gameTime);
+        R.Draw(gameTime);
+        G.Draw(gameTime);
+        B.Draw(gameTime);
+        Y.Draw(gameTime);
     }
 }

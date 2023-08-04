@@ -6,13 +6,11 @@ namespace RGB.Screens;
 
 public class MenuScreenItem : DrawableGameComponent
 {
-    private readonly SpriteBatch _spriteBatch;
     private readonly MenuScreen _menuScreen;
 
     public MenuScreenItem(Game game, MenuScreen menuScreen) : base(game)
     {
-        _menuScreen = menuScreen;
-        _spriteBatch = Game.Services.GetService<SpriteBatch>();        
+        _menuScreen = menuScreen;   
         Font = Game.Content.Load<SpriteFont>("Fonts/text");
     }
 
@@ -31,8 +29,10 @@ public class MenuScreenItem : DrawableGameComponent
 
     public override void Draw(GameTime gameTime)
     {
-        _spriteBatch.Begin();
-        _spriteBatch.DrawString(Font, Text, Position, Color);
-        _spriteBatch.End();
+        var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+
+        spriteBatch.Begin();
+        spriteBatch.DrawString(Font, Text, Position, Color);
+        spriteBatch.End();
     }
 }

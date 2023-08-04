@@ -14,17 +14,17 @@ public abstract class MenuScreen : GameScreen
     protected MenuScreen(Game game) : base(game)
     {
         PlayerInput = Game.Services.GetService<PlayerInput>();
-        SpriteBatch = Game.Services.GetService<SpriteBatch>();
+        Settings = Game.Services.GetService<IniFileSettings>();
 
         PlayerInput.OnLook += OnLook;
         PlayerInput.OnShoot += OnShoot;
     }
 
     public Vector2 Aim { get; private set; }
-    protected SpriteBatch SpriteBatch { get; init; }
     protected PlayerInput PlayerInput { get; init; }
     protected List<MenuScreenItem> Items { get; } = new();
     public bool IsActive { get; private set; } = true;
+    protected IniFileSettings Settings { get; private set; }
 
     protected void AddMenuScreenItem(
         string text,
@@ -33,14 +33,15 @@ public abstract class MenuScreen : GameScreen
         var item = new MenuScreenItem(Game, this)
         {
             Text = text,
-            Action = action
+            Action = action,
+            Bounds = new Rectangle(0, 0, 10,10)
         };
 
         var stringSize = item.Font.MeasureString(item.Text);
 
         item.Bounds = new Rectangle(
-            100,
-            100 + (int)(Items.Count * stringSize.Y),
+            GraphicsDevice.Viewport.X + (int)(Settings.Resolution.X / 6),
+            GraphicsDevice.Viewport.Y + (int)(Settings.Resolution.Y / 6) + (int)(Items.Count * stringSize.Y),
             (int)stringSize.X,
             (int)stringSize.Y);
 
@@ -51,7 +52,7 @@ public abstract class MenuScreen : GameScreen
     {
         if (_look != Vector2.Zero)
         {
-            Aim = _look;
+            Aim = _look / Settings.ScaleFactor;
             _look = Vector2.Zero;
         }
 
@@ -63,9 +64,11 @@ public abstract class MenuScreen : GameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        this.SpriteBatch.Begin();   
-        this.SpriteBatch.DrawCircle(Aim, 2, Color.Red);
-        this.SpriteBatch.End();
+        var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+
+        spriteBatch.Begin();   
+        spriteBatch.DrawCircle(Aim, 2, Color.Red);
+        spriteBatch.End();
 
         foreach (var item in Items)
         {   

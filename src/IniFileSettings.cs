@@ -10,7 +10,8 @@ public class IniFileSettings
     /// </summary>
     private IniFileSettings() { }
 
-    public Vector2 ScreenResolution { get; private set; }
+    public Vector2 Resolution { get; private set; }
+    public int ScaleFactor { get; private set; }
     public bool Fullscreen { get; private set; }
     public float PlayerSpeed { get; private set; }
     public float PlayerReloadTime { get; private set; }
@@ -25,9 +26,15 @@ public class IniFileSettings
         OnVideoSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void SetScreenResolution(Vector2 screenResolution)
+    public void SetScreenResolution(Vector2 resolution)
     {
-        ScreenResolution = screenResolution;
+        Resolution = resolution;
+        OnVideoSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void SetScaleFactor(int scaleFactor)
+    {
+        ScaleFactor = scaleFactor;
         OnVideoSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -43,7 +50,8 @@ public class IniFileSettings
             {
                 // Video
                 Fullscreen = bool.Parse(parser.GetSetting("Video", "Fullscreen")),
-                ScreenResolution = ParseScreenResolution(parser.GetSetting("Video", "ScreenResolution")),
+                Resolution = ParseResolution(parser.GetSetting("Video", "Resolution")),
+                ScaleFactor = int.Parse(parser.GetSetting("Video", "ScaleFactor")),
 
                 // Player
                 PlayerSpeed = float.Parse(parser.GetSetting("Player", "PlayerSpeed")),
@@ -63,7 +71,7 @@ public class IniFileSettings
             {
                 // Video
                 Fullscreen = false,
-                ScreenResolution = new Vector2(800, 600),
+                Resolution = new Vector2(320, 180),
 
                 // Player
                 PlayerSpeed = 100f,
@@ -73,9 +81,9 @@ public class IniFileSettings
         }
     }
 
-    private static Vector2 ParseScreenResolution(string screenResolution)
+    private static Vector2 ParseResolution(string resolution)
     {
-        var split = screenResolution.Split(new[] { 'x', 'X' });
+        var split = resolution.Split(new[] { 'x', 'X' });
         var x = int.Parse(split[0]);
         var y = int.Parse(split[1]);
 

@@ -12,10 +12,7 @@ namespace RGB;
 public class GameEngine : Game
 {
     private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
-    private PlayerInput _playerInput;
-    private ScreenManager _screenManager;
-    private OrthographicCamera _camera;
+    private RenderTarget2D _renderTarget;
 
     public GameEngine()
     {
@@ -28,13 +25,14 @@ public class GameEngine : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
 
-        _screenManager = new ScreenManager();
-        Components.Add(_screenManager);
+        ScreenManager = new ScreenManager();
 
         Settings.OnVideoSettingsChanged += Settings_OnVideoSettingsChanged;
     }
 
     public IniFileSettings Settings { get; private set; }
+    public ScreenManager ScreenManager { get ; private set; }
+    public PlayerInput PlayerInput { get; private set; }
 
     private void Settings_OnVideoSettingsChanged(object sender, System.EventArgs e)
     {
@@ -43,11 +41,10 @@ public class GameEngine : Game
 
     protected override void Initialize()
     {
-        _playerInput = new PlayerInput(this);
-        Components.Add(_playerInput);
+        PlayerInput = new PlayerInput(this);
 
         // Add required objects to the IoC container
-        Services.AddService(_playerInput);
+        Services.AddService(PlayerInput);
 
         base.Initialize();
 
@@ -56,32 +53,33 @@ public class GameEngine : Game
 
     private void InitializeGraphics()
     {
+        var renderWidth = (int)Settings.Resolution.X * Settings.ScaleFactor;
+        var renderHeight = (int)Settings.Resolution.Y * Settings.ScaleFactor;
+
         _graphics.IsFullScreen = Settings.Fullscreen;
-        _graphics.PreferredBackBufferWidth = (int)Settings.ScreenResolution.X;
-        _graphics.PreferredBackBufferHeight = (int)Settings.ScreenResolution.Y;
+        _graphics.PreferredBackBufferWidth = renderWidth;
+        _graphics.PreferredBackBufferHeight = renderHeight;
         _graphics.ApplyChanges();
 
-        _camera = new OrthographicCamera(
-            new BoxingViewportAdapter(
-                Window,
-                GraphicsDevice,
-                _graphics.PreferredBackBufferWidth,
-                _graphics.PreferredBackBufferHeight));
-        Services.AddService(_camera);
+        _renderTarget = new RenderTarget2D(
+            GraphicsDevice,
+            (int)Settings.Resolution.X,
+            (int)Settings.Resolution.Y,
+            false,
+            SurfaceFormat.Color,
+            DepthFormat.Depth24Stencil8);
     }
 
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-        // TODO: use this.Content to load your game content here
-
-        // Add required objects to the IoC container
-        Services.AddService(_spriteBatch);
     }
 
     protected override void Update(GameTime gameTime)
     {
+        PlayerInput.Update(gameTime);
+        ScreenManager.Update(gameTime);
+
         base.Update(gameTime);
     }
 
@@ -89,6 +87,34 @@ public class GameEngine : Game
     {
         // Write the fps to the window title
         Window.Title = $"RGB - FPS: {1 / gameTime.ElapsedGameTime.TotalSeconds}";
+        
+        GraphicsDevice.SetRenderTarget(_renderTarget);
+        GraphicsDevice.Clear(Color.Black);
+        ScreenManager.Draw(gameTime);
+        GraphicsDevice.SetRenderTarget(null);
+        GraphicsDevice.Clear(Color.Black);
+
+        var spriteBatch = new SpriteBatch(GraphicsDevice);  
+
+        spriteBatch.Begin(
+            sortMode: SpriteSortMode.Deferred,
+            blendState: BlendState.AlphaBlend,
+            samplerState: SamplerState.PointClamp,
+            depthStencilState: DepthStencilState.None,
+            rasterizerState: RasterizerState.CullCounterClockwise);
+
+        spriteBatch.Draw(
+            _renderTarget, 
+            new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height) / 2,
+            null,
+            Color.White, 
+            0f,
+            new Vector2(_renderTarget.Width, _renderTarget.Height) / 2,
+            Settings.ScaleFactor,
+            SpriteEffects.None,
+            1);
+
+        spriteBatch.End();
 
         base.Draw(gameTime);
     }
@@ -99,7 +125,7 @@ public class GameEngine : Game
         screen.OnNavigateForward += (sender, args) => LoadMainMenuScreen();
         screen.OnNavigateBack += (sender, args) => Exit();
 
-        _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
+        ScreenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
     }
 
     private void LoadMainMenuScreen()
@@ -109,7 +135,7 @@ public class GameEngine : Game
         screen.OnOpenOptions += (sender, args) => LoadOptionsMenuScreen();
         screen.OnExitGame += (sender, args) => Exit();
 
-        _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
+        ScreenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
     }
 
     private void LoadOptionsMenuScreen()
@@ -117,13 +143,13 @@ public class GameEngine : Game
         var screen = new OptionsMenuScreen(this);
         screen.OnNavigateBack += (sender, args) => LoadMainMenuScreen();
 
-        _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
+        ScreenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
     }
 
     private void LoadGameplayScreen()
     {
         var screen = new GameplayScreen(this);
 
-        _screenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
+        ScreenManager.LoadScreen(screen, new FadeTransition(GraphicsDevice, Color.Black, 0.5f));
     }
 }

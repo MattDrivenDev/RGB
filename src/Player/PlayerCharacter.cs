@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -12,7 +13,7 @@ namespace RGB.Player;
 /// <summary>
 /// Base class for player characters: R, G, B, and Y.
 /// </summary>
-public abstract class PlayerCharacter : DrawableGameComponent
+public abstract class PlayerCharacter
 {
     private Vector2 _movement;
     private Vector2 _look;
@@ -21,8 +22,9 @@ public abstract class PlayerCharacter : DrawableGameComponent
     private bool _shoot;
     private float _timeSinceLastShot;
 
-    protected PlayerCharacter(Game game, WorldMap map) : base(game)
+    protected PlayerCharacter(Game game, WorldMap map)
     {
+        Game = game;
         PlayerInput = Game.Services.GetService<PlayerInput>();
         PlayerInput.OnMovement += OnMovement;
         PlayerInput.OnLook += OnLook;
@@ -34,7 +36,6 @@ public abstract class PlayerCharacter : DrawableGameComponent
         PlayerReloadTime = settings.PlayerReloadTime;
         PlayerSize = settings.PlayerSize;
 
-        SpriteBatch = Game.Services.GetService<SpriteBatch>();
         Camera = Game.Services.GetService<OrthographicCamera>();
 
         Map = map;
@@ -52,26 +53,30 @@ public abstract class PlayerCharacter : DrawableGameComponent
     public Vector2 Position { get; set; }
     public CircleF BoundingCircle => new(Position, PlayerSize);
     protected Vector2 Aim { get; set; }
-    protected SpriteBatch SpriteBatch { get; init; }
     protected abstract Color Color { get; }
-    public bool IsActive => Enabled;
+    public bool IsActive { get; private set; }
     protected OrthographicCamera Camera { get; init; }
     protected WorldMap Map { get; init; }
+    protected Game Game { get; init; }
+    protected List<Projectile> Projectiles { get; } = new();
 
     public void Activate(PlayerCharacter previous)
     {
         _previous = previous;
+        IsActive = true;
         _hasActivated = true;
-        Enabled = true;
     }
 
     public void Deactivate()
     {
-        Enabled = false;
+        IsActive = false;
     }
     
-    public override void Update(GameTime gameTime)
+    public virtual void Update(GameTime gameTime)
     {
+        // Projectiles have to be updated regardless of whether the player is active or not.
+        Projectiles.ForEach(x => x.Update(gameTime));
+
         if (!IsActive)
         {
             return;
@@ -90,8 +95,6 @@ public abstract class PlayerCharacter : DrawableGameComponent
         Look();
 
         Shoot(totalTime);
-
-        base.Update(gameTime);
     }
 
     private void Move(float deltaTime)
@@ -144,7 +147,7 @@ public abstract class PlayerCharacter : DrawableGameComponent
             var angleInDegrees = MathHelper.ToDegrees(angleInRadians);
             
             var projectile = new Projectile(Game, Map, Position, angleInDegrees, 10);
-            Game.Components.Add(projectile);
+            Projectiles.Add(projectile);
 
             // Reset the shoot flag.
             _shoot = false;
@@ -154,33 +157,35 @@ public abstract class PlayerCharacter : DrawableGameComponent
         }
     }
 
-    public override void Draw(GameTime gameTime)
+    public virtual void Draw(GameTime gameTime)
     {
+        Projectiles.ForEach(x => x.Draw(gameTime));
+
+        var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+
         var viewMatrix = Camera.GetViewMatrix();
-        this.SpriteBatch.Begin(transformMatrix: viewMatrix);
-        this.SpriteBatch.DrawCircle(Position, 10, this.Color);       
+        spriteBatch.Begin(transformMatrix: viewMatrix);
+        spriteBatch.DrawCircle(Position, 10, this.Color);       
 
         // Only render the aim if the player is active.
         if (IsActive)
         {
-            this.SpriteBatch.DrawCross(Aim, 3, this.Color);
+            spriteBatch.DrawCross(Aim, 3, this.Color);
         }
 
         if (_hasActivated)
         {
-            this.SpriteBatch.DrawCircle(Position, 12, Color.White);
+            spriteBatch.DrawCircle(Position, 12, Color.White);
             _hasActivated = false;
 
             if (_previous != null)
             {
-                this.SpriteBatch.DrawLine(_previous.Position, Position, Color.White, 2);
+                spriteBatch.DrawLine(_previous.Position, Position, Color.White, 2);
                 _previous = null;
             }
         }
         
-        this.SpriteBatch.End();
-
-        base.Draw(gameTime);
+        spriteBatch.End();
     }
 
     private void OnSwitchWeapon(object sender, WeaponSlotEventArgs e)

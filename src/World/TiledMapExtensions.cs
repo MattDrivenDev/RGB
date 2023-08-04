@@ -58,7 +58,7 @@ namespace RGB.World
                                     var circleCollider = new MapCollider(
                                         new CircleF(new Point2(
                                             tile.X * layer.TileWidth + ellipse.Center.X,
-                                            tile.Y * layer.TileWidth + ellipse.Center.Y),
+                                            tile.Y * layer.TileHeight + ellipse.Center.Y),
                                             ellipse.Radius.X));
                                     results.Add(circleCollider);
                                     break;

@@ -41,9 +41,11 @@ public abstract class SplashScreen : GameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        this.SpriteBatch.Begin();   
-        this.SpriteBatch.DrawCircle(Aim, 2, Color.Red);
-        this.SpriteBatch.End();
+        var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+
+        spriteBatch.Begin();   
+        spriteBatch.DrawCircle(Aim, 2, Color.Red);
+        spriteBatch.End();
     }
 
     private void OnEscapeOrMenu(object sender, EventArgs e)

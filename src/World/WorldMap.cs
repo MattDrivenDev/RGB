@@ -9,23 +9,25 @@ using System.Linq;
 
 namespace RGB.World
 {
-    public class WorldMap : DrawableGameComponent
+    public class WorldMap
     {
         public const string LayerName_Spawn = "Spawn";
         public const string LayerName_Walls = "Walls";
         public const string LayerName_Base = "Base";
 
-        public WorldMap(Game game, string tmx, OrthographicCamera camera) : base(game)
+        public WorldMap(Game game, string tmx, OrthographicCamera camera)
         {
+            Game = game;
             TiledMap = Game.Content.Load<TiledMap>(tmx);
             BaseLayer = TiledMap.GetLayer<TiledMapTileLayer>(LayerName_Base);
             WallLayer = TiledMap.GetLayer<TiledMapTileLayer>(LayerName_Walls);
             SpawnLayer = TiledMap.GetLayer<TiledMapObjectLayer>(LayerName_Spawn);
-            Renderer = new TiledMapRenderer(GraphicsDevice, TiledMap);
+            Renderer = new TiledMapRenderer(Game.GraphicsDevice, TiledMap);
             CollisionActors = TiledMap.GetCollisionActors();
             Camera = camera;
         }
 
+        public Game Game { get; init; }
         public TiledMapRenderer Renderer { get; init; }
         public TiledMap TiledMap { get; init; }
         public TiledMapTileLayer BaseLayer { get; init; }
@@ -66,13 +68,12 @@ namespace RGB.World
             return tile;
         }
 
-        public override void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime)
         {
             Renderer.Update(gameTime);
-            base.Update(gameTime);
         }
 
-        override public void Draw(GameTime gameTime)
+        public virtual void Draw(GameTime gameTime)
         {
             Renderer.Draw(Camera.GetViewMatrix());
         }

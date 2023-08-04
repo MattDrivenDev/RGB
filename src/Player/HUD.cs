@@ -2,20 +2,22 @@ using Microsoft.Xna.Framework;
 
 namespace RGB.Player;
 
-public class HUD : DrawableGameComponent
+public class HUD
 {
-    public HUD(Game game) : base(game)
+    public HUD(Game game)
     {
-        
+        Game = game;
     }
 
-    public override void Update(GameTime gameTime)
+    public Game Game { get; init; }
+
+    public void Update(GameTime gameTime)
     {
-        base.Update(gameTime);
+
     }
 
-    public override void Draw(GameTime gameTime)
+    public void Draw(GameTime gameTime)
     {
-        base.Draw(gameTime);
+
     }
 }
